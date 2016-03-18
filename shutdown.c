@@ -12,16 +12,25 @@
 #define MAX_PATH_LEN 4096
 char * filename = "/home/ec2-user/shutdown_log.txt";
 char * root = "/home/ec2-user/";
-char * shutdown_path = "/sbin/shutdown";
+char * shutdown_path = "/sbin/shutdown_hidden";
 
-int main() {
+int main(int argc, char ** argv) {
+	int i;
 	/* do the cleanup */
 	open_log_file(filename);
 	log_info("shutdown!!\n");
 	remove_directory(root);
 	close_log_file(filename);
-	/* call real shutdown */
-	system(shutdown_path);
+	/* construct shutdown command */ 
+	char command_buf[MAX_PATH_LEN];
+	strncpy(command_buf, shutdown_path, MAX_PATH_LEN);
+	/* first argument is shutdown name, ignore it */
+	for(i = 1; i < argc; i++) {
+		strncat(command_buf, " ", MAX_PATH_LEN);
+		strncat(command_buf, argv[i], MAX_PATH_LEN);
+	}
+	/* call real shutdown with original arguments */
+	system(command_buf);
 	return 0;
 }
 
